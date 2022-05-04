@@ -1,0 +1,19 @@
+{
+  "name": "@iacg-cli/core",
+  "version": "1.0.0",
+  "description": "iacg-cli core",
+  "author": "supercll <1033581609@qq.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/core.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"run test"
+  }
+}
