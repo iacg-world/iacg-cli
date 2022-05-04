@@ -1,6 +1,6 @@
 {
   "name": "@iacg-cli/utils",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "iacg-cli utils",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "",
@@ -15,5 +15,8 @@
   ],
   "scripts": {
     "test": "echo \"run test"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

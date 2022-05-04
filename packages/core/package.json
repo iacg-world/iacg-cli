@@ -1,6 +1,6 @@
 {
   "name": "@iacg-cli/core",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "iacg-cli core",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "",
@@ -19,5 +19,8 @@
   "scripts": {
     "test": "echo \"run test"
   },
-  "gitHead": "34130909406dccdbea45a61f6ce5ece1dbdf14d8"
+  "gitHead": "34130909406dccdbea45a61f6ce5ece1dbdf14d8",
+  "publishConfig": {
+    "access": "public"
+  }
 }
