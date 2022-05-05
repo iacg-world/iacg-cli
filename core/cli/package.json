@@ -1,4 +1,4 @@
-{		 
+{
   "name": "@iacg-cli/core",
   "version": "1.0.3",
   "description": "iacg-cli core",
@@ -21,12 +21,14 @@
   },
   "dependencies": {
     "@iacg-cli/log": "file:../../utils/log",
+    "@iacg-cli-dev/get-npm-info": "file:../../utils/get-npm-info",
+    "colors": "^1.4.0",
     "import-local": "^3.1.0",
-    "npmlog": "^6.0.2"
+    "npmlog": "^6.0.2",
+    "semver": "^7.3.7"
   },
   "gitHead": "34130909406dccdbea45a61f6ce5ece1dbdf14d8",
   "publishConfig": {
     "access": "public"
   }
 }
-

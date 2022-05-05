@@ -3,15 +3,33 @@
 module.exports = core
 
 // require支持加载的资源 .js/.json/.node，其他文件会被当做js解析
-const pgk = require("../package.json")
+const pkg = require("../package.json")
 const log = require("@iacg-cli/log")
+const semver = require("semver")
+const colors = require("colors")
 
 function core() {
-  console.log("exec core")
-  checkPkgVersion()
+  try {
+    checkPkgVersion()
+    checkUpdate()
+  } catch (error) {
+    log.error(error.message)
+  }
+}
+
+async function checkUpdate() {
+  const currentVersion = pkg.version
+  const npmName = pkg.name
+  const { getNpmSemverVersion } = require("@iacg-cli-dev/get-npm-info")
+  const lastVersion = await getNpmSemverVersion(currentVersion, npmName)
+  if (lastVersion && semver.gt(lastVersion, currentVersion)) {
+    log.warn(
+      colors.yellow(`请手动更新 ${npmName}，当前版本：${currentVersion}，最新版本：${lastVersion}
+                更新命令： npm install -g ${npmName}`),
+    )
+  }
 }
 
 function checkPkgVersion() {
-  console.log(pgk.version)
-  log()
+  log.info("cli", pkg.version)
 }
