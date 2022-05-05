@@ -12,9 +12,14 @@ function core() {
   try {
     checkPkgVersion()
     checkUpdate()
+    checkRoot()
   } catch (error) {
     log.error(error.message)
   }
+}
+
+function checkRoot() {
+  require("root-check")()  // root账号启动检查和自动降级功能
 }
 
 async function checkUpdate() {
