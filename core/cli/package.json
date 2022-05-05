@@ -1,13 +1,13 @@
-{
+{		 
   "name": "@iacg-cli/core",
   "version": "1.0.3",
   "description": "iacg-cli core",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "",
   "license": "ISC",
-  "main": "lib/core.js",
+  "main": "lib/index.js",
   "bin": {
-    "iacg": "bin/index.js"
+    "iacg-cli": "bin/index.js"
   },
   "directories": {
     "lib": "lib",
@@ -19,8 +19,14 @@
   "scripts": {
     "test": "echo \"run test"
   },
+  "dependencies": {
+    "@iacg-cli/log": "file:../../utils/log",
+    "import-local": "^3.1.0",
+    "npmlog": "^6.0.2"
+  },
   "gitHead": "34130909406dccdbea45a61f6ce5ece1dbdf14d8",
   "publishConfig": {
     "access": "public"
   }
 }
+
