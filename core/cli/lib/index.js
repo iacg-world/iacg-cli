@@ -7,19 +7,57 @@ const pkg = require("../package.json")
 const log = require("@iacg-cli/log")
 const semver = require("semver")
 const colors = require("colors")
+const userHome = require("user-home")
+const pathExists = require("path-exists")
+const path = require("path")
+
+const constant = require('./const');
 
 function core() {
   try {
     checkPkgVersion()
     checkUpdate()
     checkRoot()
+    checkUserHome()
+    checkEnv()
   } catch (error) {
     log.error(error.message)
   }
 }
 
 function checkRoot() {
-  require("root-check")()  // root账号启动检查和自动降级功能
+  require("root-check")() // root账号启动检查和自动降级功能
+}
+
+function checkUserHome() {
+  if (!userHome || !pathExists(userHome)) {
+    throw new Error(colors.red("当前登录用户主目录不存在！"))
+  }
+}
+
+function checkEnv() {
+  const dotenv = require("dotenv")
+  const dotenvPath = path.resolve(userHome, ".env")
+  if (pathExists(dotenvPath)) {
+    dotenv.config({
+      path: dotenvPath,
+    })
+  }
+  createDefaultConfig()
+  log.info('环境变量', process.env.CLI_HOME_PATH)
+}
+
+// 创建默认cli配置
+function createDefaultConfig() {
+  const cliConfig = {
+    home: userHome,
+  }
+  if (process.env.CLI_HOME) {
+    cliConfig["cliHome"] = path.join(userHome, process.env.CLI_HOME)
+  } else {
+    cliConfig["cliHome"] = path.join(userHome, constant.DEFAULT_CLI_HOME)
+  }
+  process.env.CLI_HOME_PATH = cliConfig.cliHome
 }
 
 async function checkUpdate() {

@@ -23,10 +23,13 @@
     "@iacg-cli-dev/get-npm-info": "file:../../utils/get-npm-info",
     "@iacg-cli/log": "file:../../utils/log",
     "colors": "^1.4.0",
+    "dotenv": "^16.0.0",
     "import-local": "^3.1.0",
     "npmlog": "^6.0.2",
+    "path-exists": "^4.0.0",
     "root-check": "^1.0.0",
-    "semver": "^7.3.7"
+    "semver": "^7.3.7",
+    "user-home": "^2.0.0"
   },
   "gitHead": "34130909406dccdbea45a61f6ce5ece1dbdf14d8",
   "publishConfig": {
