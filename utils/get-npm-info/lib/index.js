@@ -27,9 +27,11 @@ function getDefaultRegistry(isOriginal = false) {
   return isOriginal ? "https://registry.npmjs.org" : "https://registry.npm.taobao.org"
 }
 
+
 async function getNpmVersions(npmName, registry) {
   const data = await getNpmInfo(npmName, registry)
   if (data) {
+    // 版本列表
     return Object.keys(data.versions)
   } else {
     return []
@@ -51,6 +53,7 @@ async function getNpmSemverVersion(baseVersion, npmName, registry) {
   return null
 }
 
+// 从大到小排序最近的版本
 async function getNpmLatestVersion(npmName, registry) {
   let versions = await getNpmVersions(npmName, registry)
   if (versions) {

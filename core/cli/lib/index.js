@@ -11,7 +11,7 @@ const userHome = require("user-home")
 const pathExists = require("path-exists")
 const path = require("path")
 
-const constant = require('./const');
+const constant = require("./const")
 
 function core() {
   try {
@@ -35,6 +35,7 @@ function checkUserHome() {
   }
 }
 
+// 检查环境变量
 function checkEnv() {
   const dotenv = require("dotenv")
   const dotenvPath = path.resolve(userHome, ".env")
@@ -44,7 +45,7 @@ function checkEnv() {
     })
   }
   createDefaultConfig()
-  log.info('环境变量', process.env.CLI_HOME_PATH)
+  log.info("环境变量", process.env.CLI_HOME_PATH)
 }
 
 // 创建默认cli配置
@@ -61,8 +62,11 @@ function createDefaultConfig() {
 }
 
 async function checkUpdate() {
+  // 1. 获取当前版本号和模块名与npm线上作对比
   const currentVersion = pkg.version
   const npmName = pkg.name
+  // 2. 调用npm API 获取所有package版本号
+  // 3. 提取所有版本号，比对哪些版本号是大于当前版本号，并提示用户更新
   const { getNpmSemverVersion } = require("@iacg-cli-dev/get-npm-info")
   const lastVersion = await getNpmSemverVersion(currentVersion, npmName)
   if (lastVersion && semver.gt(lastVersion, currentVersion)) {
