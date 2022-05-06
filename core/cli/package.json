@@ -22,7 +22,9 @@
   "dependencies": {
     "@iacg-cli-dev/get-npm-info": "file:../../utils/get-npm-info",
     "@iacg-cli/log": "file:../../utils/log",
+    "@iacg-cli/init": "file:../../commands/init",
     "colors": "^1.4.0",
+    "commander": "^9.2.0",
     "dotenv": "^16.0.0",
     "import-local": "^3.1.0",
     "npmlog": "^6.0.2",

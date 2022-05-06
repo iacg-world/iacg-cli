@@ -10,8 +10,10 @@ const colors = require("colors")
 const userHome = require("user-home")
 const pathExists = require("path-exists")
 const path = require("path")
+const program = require("commander")
 
 const constant = require("./const")
+const init = require('@iacg-cli/init')
 
 function core() {
   try {
@@ -20,8 +22,56 @@ function core() {
     checkRoot()
     checkUserHome()
     checkEnv()
+    registerCommand()
   } catch (error) {
     log.error(error.message)
+  }
+}
+
+// 注册命令
+function registerCommand() {
+  program
+    .name(Object.keys(pkg.bin)[0]) // 从bin获取属性名称
+    .usage("<command> [options]")
+    .version(pkg.version)
+    .option("-d, --debug", "是否开启调试模式", false)
+    .option("-tp, --targetPath <targetPath>", "是否指定本地调试文件路径", "")
+
+  program
+    .command("init [projectName]")
+    .option("-f, --force", "是否强制初始化项目")
+    .action(init)
+
+
+  // 开启debug模式
+  program.on("option:debug", function () {
+    if (program.debug) {
+      process.env.LOG_LEVEL = "verbose"
+    } else {
+      process.env.LOG_LEVEL = "info"
+    }
+    log.level = process.env.LOG_LEVEL
+  })
+
+  // 指定targetPath
+  program.on("option:targetPath", function () {
+    process.env.CLI_TARGET_PATH = program.targetPath
+  })
+
+  // 对未知命令监听
+  program.on("command:*", function (obj) {
+    const availableCommands = program.commands.map(cmd => cmd.name())
+    log.warn(colors.red("未知的命令：" + obj[0]))
+    if (availableCommands.length > 0) {
+      log.notice(colors.red("可用命令：" + availableCommands.join(",")))
+    }
+  })
+
+  program.parse(process.argv)
+
+  if (program.args && program.args.length < 1) {
+    // args是一个传入参数的数组
+    program.outputHelp()
   }
 }
 
