@@ -4,10 +4,12 @@ const path = require("path")
 const fse = require("fs-extra")
 const pkgDir = require("pkg-dir").sync
 const pathExists = require("path-exists").sync
+const npminstall = require("npminstall") //
 
 const { isObject } = require("@iacg-cli/utils")
 const formatPath= require("@iacg-cli/format-path")
 const {
+  getDefaultRegistry,
   getNpmLatestVersion,
 } = require("@iacg-cli/get-npm-info")
 
@@ -64,7 +66,47 @@ class Package {
     }
   }
 
+  // 安装Package
+  async install() {
+    await this.prepare()
+    return npminstall({
+      root: this.targetPath,
+      storeDir: this.storeDir,
+      registry: getDefaultRegistry(),
+      pkgs: [
+        {
+          name: this.packageName,
+          version: this.packageVersion,
+        },
+      ],
+    })
+  }
 
+  // 更新Package
+  async update() {
+    await this.prepare()
+    // 1. 获取最新的npm模块版本号
+    const latestPackageVersion = await getNpmLatestVersion(this.packageName)
+    // 2. 查询最新版本号对应的路径是否存在
+    const latestFilePath = this.getSpecificCacheFilePath(latestPackageVersion)
+    // 3. 如果不存在，则直接安装最新版本
+    if (!pathExists(latestFilePath)) {
+      await npminstall({
+        root: this.targetPath,
+        storeDir: this.storeDir,
+        registry: getDefaultRegistry(),
+        pkgs: [
+          {
+            name: this.packageName,
+            version: latestPackageVersion,
+          },
+        ],
+      })
+      this.packageVersion = latestPackageVersion
+    } else {
+      this.packageVersion = latestPackageVersion
+    }
+  }
 
   // 获取入口文件的路径
   getRootFilePath() {
