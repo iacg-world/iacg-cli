@@ -1,6 +1,5 @@
 "use strict"
 
-module.exports = core
 
 // require支持加载的资源 .js/.json/.node，其他文件会被当做js解析
 const pkg = require("../package.json")
@@ -123,7 +122,7 @@ async function checkUpdate() {
   const npmName = pkg.name
   // 2. 调用npm API 获取所有package版本号
   // 3. 提取所有版本号，比对哪些版本号是大于当前版本号，并提示用户更新
-  const { getNpmSemverVersion } = require("@iacg-cli-dev/get-npm-info")
+  const { getNpmSemverVersion } = require("@iacg-cli/get-npm-info")
   const lastVersion = await getNpmSemverVersion(currentVersion, npmName)
   if (lastVersion && semver.gt(lastVersion, currentVersion)) {
     log.warn(
@@ -136,3 +135,5 @@ async function checkUpdate() {
 function checkPkgVersion() {
   log.info("cli", pkg.version)
 }
+
+module.exports = core

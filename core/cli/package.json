@@ -20,7 +20,7 @@
     "test": "echo \"run test"
   },
   "dependencies": {
-    "@iacg-cli-dev/get-npm-info": "file:../../utils/get-npm-info",
+    "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@iacg-cli/log": "file:../../utils/log",
     "@iacg-cli/init": "file:../../commands/init",
     "@iacg-cli/exec": "file:../exec",
