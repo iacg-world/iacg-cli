@@ -1,7 +1,7 @@
 {
-  "name": "@iacg-cli/package",
+  "name": "@iacg-cli/format-path",
   "version": "1.0.0",
-  "description": "iacg-cli npm modules",
+  "description": "iacg-cli format path",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "https://github.com/iacg-world/iacg-cli#readme",
   "license": "ISC",
@@ -22,19 +22,6 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "dependencies": {
-    "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
-    "@iacg-cli/utils": "file:../../utils/utils",
-    "@iacg-cli/format-path": "file:../../utils/format-path",
-    "fs-extra": "^9.0.1",
-    "npminstall": "^4.10.0",
-    "path-exists": "^4.0.0",
-    "pkg-dir": "^5.0.0"
-  },
-  "devDependencies": {
-    "mocha": "^9.1.0",
-    "should": "^13.2.3"
   },
   "bugs": {
     "url": "https://github.com/iacg-world/iacg-cli/issues"

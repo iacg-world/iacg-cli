@@ -12,8 +12,8 @@ const path = require("path")
 const program = require("commander")
 
 const constant = require("./const")
-const init = require('@iacg-cli/init')
 const exec = require('@iacg-cli/exec')
+const formatPath= require("@iacg-cli/format-path")
 
 async function core() {
   try {
@@ -59,7 +59,7 @@ function registerCommand() {
 
   // 指定targetPath
   program.on("option:targetPath", function () {
-    const targetPath = program._optionValues.targetPath
+    const targetPath = formatPath(program.targetPath)
     process.env.CLI_TARGET_PATH = targetPath
   })
 
