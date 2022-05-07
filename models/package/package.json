@@ -1,6 +1,6 @@
 {
   "name": "@iacg-cli/package",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "iacg-cli npm modules",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "https://github.com/iacg-world/iacg-cli#readme",
@@ -24,9 +24,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@iacg-cli/format-path": "file:../../utils/format-path",
     "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@iacg-cli/utils": "file:../../utils/utils",
-    "@iacg-cli/format-path": "file:../../utils/format-path",
     "fs-extra": "^9.0.1",
     "npminstall": "^4.10.0",
     "path-exists": "^4.0.0",

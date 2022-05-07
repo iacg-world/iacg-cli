@@ -1,6 +1,6 @@
 {
   "name": "@iacg-cli/core",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "iacg-cli core",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "",
@@ -20,11 +20,11 @@
     "test": "echo \"run test"
   },
   "dependencies": {
-    "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
-    "@iacg-cli/log": "file:../../utils/log",
-    "@iacg-cli/init": "file:../../commands/init",
     "@iacg-cli/exec": "file:../exec",
     "@iacg-cli/format-path": "file:../../utils/format-path",
+    "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
+    "@iacg-cli/init": "file:../../commands/init",
+    "@iacg-cli/log": "file:../../utils/log",
     "colors": "^1.4.0",
     "commander": "^6.2.1",
     "dotenv": "^16.0.0",
