@@ -2,6 +2,6 @@
 
 module.exports = init;
 
-function init() {
-    console.log('init');
+function init(projectName, options, cmdObj) {
+    console.log('init', projectName, cmdObj.parent._optionValues);
 }

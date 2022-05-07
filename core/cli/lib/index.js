@@ -15,23 +15,28 @@ const program = require("commander")
 const constant = require("./const")
 const init = require('@iacg-cli/init')
 
-function core() {
+async function core() {
   try {
-    checkPkgVersion()
-    checkUpdate()
-    checkRoot()
-    checkUserHome()
-    checkEnv()
+
+    await prepare
     registerCommand()
   } catch (error) {
     log.error(error.message)
   }
 }
 
+async function prepare() {
+  checkPkgVersion();
+  checkRoot();
+  checkUserHome();
+  checkEnv();
+  await checkUpdate();
+}
+
 // 注册命令
 function registerCommand() {
   program
-    .name(Object.keys(pkg.bin)[0]) // 从bin获取属性名称
+    .name(Object.keys(pkg.bin)[0]) // 从bin 获取属性名称
     .usage("<command> [options]")
     .version(pkg.version)
     .option("-d, --debug", "是否开启调试模式", false)
@@ -55,7 +60,8 @@ function registerCommand() {
 
   // 指定targetPath
   program.on("option:targetPath", function () {
-    process.env.CLI_TARGET_PATH = program.targetPath
+    const targetPath = program._optionValues.targetPath
+    process.env.CLI_TARGET_PATH = targetPath
   })
 
   // 对未知命令监听
