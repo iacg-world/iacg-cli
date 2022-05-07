@@ -14,11 +14,11 @@ const program = require("commander")
 
 const constant = require("./const")
 const init = require('@iacg-cli/init')
+const exec = require('@iacg-cli/exec')
 
 async function core() {
   try {
-
-    await prepare
+    await prepare()
     registerCommand()
   } catch (error) {
     log.error(error.message)
@@ -45,7 +45,7 @@ function registerCommand() {
   program
     .command("init [projectName]")
     .option("-f, --force", "是否强制初始化项目")
-    .action(init)
+    .action(exec)
 
 
   // 开启debug模式
