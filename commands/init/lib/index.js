@@ -1,7 +1,7 @@
 'use strict'
 
-const Command = require('@imooc-cli-dev/command')
-const log = require('@imooc-cli-dev/log')
+const Command = require('@iacg-cli/command')
+const log = require('@iacg-cli/log')
 
 class InitCommand extends Command {
   init() {
