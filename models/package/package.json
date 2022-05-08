@@ -28,6 +28,7 @@
     "@iacg-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@iacg-cli/utils": "file:../../utils/utils",
     "@iacg-cli/init": "file:../../commands/init",
+    "@iacg-cli/log": "file:../../utils/log",
     "fs-extra": "^9.0.1",
     "npminstall": "^4.10.0",
     "path-exists": "^4.0.0",

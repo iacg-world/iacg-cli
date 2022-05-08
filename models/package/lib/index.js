@@ -1,25 +1,26 @@
-"use strict"
+'use strict'
 
-const path = require("path")
-const fse = require("fs-extra")
-const pkgDir = require("pkg-dir").sync
-const pathExists = require("path-exists").sync
-const npminstall = require("npminstall") //
+const path = require('path')
+const fse = require('fs-extra')
+const pkgDir = require('pkg-dir').sync
+const pathExists = require('path-exists').sync
+const npminstall = require('npminstall') //
 
-const { isObject } = require("@iacg-cli/utils")
-const formatPath= require("@iacg-cli/format-path")
+const { isObject } = require('@iacg-cli/utils')
+const formatPath = require('@iacg-cli/format-path')
+const log = require('@iacg-cli/log')
 const {
   getDefaultRegistry,
   getNpmLatestVersion,
-} = require("@iacg-cli/get-npm-info")
+} = require('@iacg-cli/get-npm-info')
 
 class Package {
   constructor(options) {
     if (!options) {
-      throw new Error("Package类的options参数不能为空！")
+      throw new Error('Package类的options参数不能为空！')
     }
     if (!isObject(options)) {
-      throw new Error("Package类的options参数必须为对象！")
+      throw new Error('Package类的options参数必须为对象！')
     }
     // package的目标路径
     this.targetPath = options.targetPath
@@ -30,14 +31,14 @@ class Package {
     // package的version
     this.packageVersion = options.packageVersion
     // package的缓存目录前缀
-    this.cacheFilePathPrefix = this.packageName.replace("/", "_")
+    this.cacheFilePathPrefix = this.packageName.replace('/', '_')
   }
 
   async prepare() {
     if (this.storeDir && !pathExists(this.storeDir)) {
       fse.mkdirpSync(this.storeDir)
     }
-    if (this.packageVersion === "latest") {
+    if (this.packageVersion === 'latest') {
       this.packageVersion = await getNpmLatestVersion(this.packageName)
     }
   }
@@ -110,12 +111,15 @@ class Package {
 
   // 获取入口文件的路径
   getRootFilePath() {
+    log.verbose('storeDir', this.storeDir)
+
     function _getRootFile(targetPath) {
       // 1. 获取package.json所在目录
       const dir = pkgDir(targetPath)
+      log.verbose('dir', dir)
       if (dir) {
         // 2. 读取package.json
-        const pkgFile = require(path.resolve(dir, "package.json"))
+        const pkgFile = require(path.resolve(dir, 'package.json'))
         // 3. 寻找main/lib
         if (pkgFile && pkgFile.main) {
           // 4. 路径的兼容(macOS/windows)
