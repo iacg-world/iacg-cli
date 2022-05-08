@@ -2,7 +2,7 @@
 
 const semver = require('semver')
 const colors = require('colors/safe')
-const log = require('@iacg-clilog')
+const log = require('@iacg-cli/log')
 
 const LOWEST_NODE_VERSION = '12.0.0'
 
