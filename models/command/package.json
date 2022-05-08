@@ -1,11 +1,8 @@
 {
-  "name": "@iacg-cli/get-npm-info",
+  "name": "@iacg-cli/command",
   "version": "1.0.4",
-  "description": "iacg-cli get-npm-info",
-  "keywords": [
-    "getNpmInfo"
-  ],
-  "author": "supercll <1033581609@qq.com>",
+  "description": "> TODO: description",
+  "author": "lc <1033581609@qq.com>",
   "homepage": "https://github.com/iacg-world/iacg-cli#readme",
   "license": "ISC",
   "main": "lib/index.js",
@@ -26,12 +23,12 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "dependencies": {
+    "@iacg-cli/log": "file:../../utils/log",
+    "colors": "^1.4.0",
+    "semver": "^7.3.7"
+  },
   "bugs": {
     "url": "https://github.com/iacg-world/iacg-cli/issues"
-  },
-  "dependencies": {
-    "axios": "^0.27.2",
-    "semver": "^7.3.7",
-    "url-join": "^4.0.1"
   }
 }

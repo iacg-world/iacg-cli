@@ -23,6 +23,10 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "dependencies": {
+    "@iacg-cli/log": "file:../../utils/log",
+    "@iacg-cli/command": "file:../../models/command"
+  },
   "bugs": {
     "url": "https://github.com/iacg-world/iacg-cli/issues"
   }

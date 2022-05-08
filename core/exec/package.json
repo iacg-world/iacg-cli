@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "@iacg-cli/log": "file:../../utils/log",
-    "@iacg-cli/package": "file:../../models/package"
+    "@iacg-cli/package": "file:../../models/package",
+    "@iacg-cli/init": "file:../../commands/init"
   },
   "bugs": {
     "url": "https://github.com/iacg-world/iacg-cli/issues"
