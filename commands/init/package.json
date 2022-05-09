@@ -24,8 +24,10 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@iacg-cli/command": "file:../../models/command",
     "@iacg-cli/log": "file:../../utils/log",
-    "@iacg-cli/command": "file:../../models/command"
+    "fs-extra": "^10.1.0",
+    "inquirer": "^8.2.4"
   },
   "bugs": {
     "url": "https://github.com/iacg-world/iacg-cli/issues"
