@@ -61,7 +61,7 @@ async function exec() {
       const args = Array.from(arguments)
       const cmd = args[args.length - 1]
       const object = Object.create(null)
-      Object.keys(cmd).forEach(key => {
+      Object.keys(cmd).forEach((key) => {
         if (
           cmd.hasOwnProperty(key) &&
           !key.startsWith('_') &&
@@ -78,11 +78,11 @@ async function exec() {
         stdio: 'inherit',
       })
 
-      child.on('error', e => {
+      child.on('error', (e) => {
         log.error(e.message)
         process.exit(1)
       })
-      child.on('exit', e => {
+      child.on('exit', (e) => {
         log.verbose('命令执行成功:' + e)
         process.exit(e)
       })
