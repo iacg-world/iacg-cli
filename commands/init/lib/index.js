@@ -3,17 +3,22 @@
 const inquirer = require('inquirer')
 const fse = require('fs-extra')
 const semver = require('semver')
+const userHome = require('user-home')
+const fs = require('fs')
+const path = require('path')
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
-
 const PREFIX_UNICODE = {
   INIT: '\ud83d\udccc',
-  INPUT: '✍️ '
+  INPUT: '✍️ ',
 }
+
+const getProjectTemplate = require('./getProjectTemplate')
+// const { spinnerStart, sleep } = require('@iacg-cli/utils');
 
 class InitCommand extends Command {
   init() {
@@ -33,14 +38,16 @@ class InitCommand extends Command {
       log.error(error)
     }
   }
+
+
   async prepare() {
     // throw new Error("出错了")
-    // 0. 判断项目模板是否存在
-    // const template = await getProjectTemplate()
-    // if (!template || template.length === 0) {
-    //   throw new Error('项目模板不存在')
-    // }
-    // this.template = template
+    const template = await getProjectTemplate()
+
+    if (!this.checkTemplate(template)) {
+      throw new Error('项目模板不存在')
+    }
+    this.template = template
     // 1. 判断当前目录是否为空
     const localPath = process.cwd()
     log.verbose('localPath', localPath)
@@ -80,7 +87,10 @@ class InitCommand extends Command {
 
     return this.getProjectInfo()
   }
-
+  checkTemplate(template) {
+    // 0. 判断项目模板是否存在
+    return template && template.length !== 0
+  }
   async getProjectInfo() {
     // 1. 选择创建项目或组件
     const { type } = await inquirer.prompt({
