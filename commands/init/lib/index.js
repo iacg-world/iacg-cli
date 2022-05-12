@@ -2,9 +2,18 @@
 
 const inquirer = require('inquirer')
 const fse = require('fs-extra')
+const semver = require('semver')
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
+
+const TYPE_PROJECT = 'project'
+const TYPE_COMPONENT = 'component'
+
+const PREFIX_UNICODE = {
+  INIT: '\ud83d\udccc',
+  INPUT: '✍️ '
+}
 
 class InitCommand extends Command {
   init() {
@@ -58,7 +67,9 @@ class InitCommand extends Command {
           type: 'confirm',
           name: 'confirmDelete',
           default: false,
-          message: `${this.force ? '当前目录不为空，': ''}是否确认清空当前目录下的文件？`,
+          message: `${
+            this.force ? '当前目录不为空，' : ''
+          }是否确认清空当前目录下的文件？`,
         })
         if (confirmDelete) {
           // 清空当前目录
@@ -66,9 +77,97 @@ class InitCommand extends Command {
         }
       }
     }
+
+    return this.getProjectInfo()
   }
 
+  async getProjectInfo() {
+    // 1. 选择创建项目或组件
+    const { type } = await inquirer.prompt({
+      type: 'list',
+      name: 'type',
+      message: '请选择初始化类型',
+      default: TYPE_PROJECT,
+      prefix: PREFIX_UNICODE.INIT,
+      choices: [
+        {
+          name: '项目',
+          value: TYPE_PROJECT,
+        },
+        {
+          name: '组件',
+          value: TYPE_COMPONENT,
+        },
+      ],
+    })
+    log.verbose('type', type)
 
+    const createProjectTemplate = async () => {
+      // 2. 获取项目的基本信息
+      const project = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'projectName',
+          message: '请输入项目名称',
+          prefix: PREFIX_UNICODE.INPUT,
+          default: '',
+          validate: function (v) {
+            const done = this.async()
+            setTimeout(function () {
+              // 1.首字符必须为英文字符
+              // 2.尾字符必须为英文或数字，不能为字符
+              // 3.字符仅允许"-和_"
+              if (
+                !/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
+                  v
+                )
+              ) {
+                done('请输入合法的项目名称')
+                return
+              }
+              done(null, true)
+            }, 0)
+          },
+          filter: function (v) {
+            return v
+          },
+        },
+        {
+          type: 'input',
+          name: 'projectVersion',
+          message: '请输入项目版本号',
+          default: '1.0.0',
+          prefix: PREFIX_UNICODE.INPUT,
+          validate: function (v) {
+            const done = this.async()
+            setTimeout(function () {
+              if (!!!semver.valid(v)) {
+                done('请输入合法的版本号')
+                return
+              }
+              done(null, true)
+            }, 0)
+          },
+          filter: function (v) {
+            if (!!semver.valid(v)) {
+              return semver.valid(v)
+            } else {
+              return v
+            }
+          },
+        },
+      ])
+      return {
+        type,
+        ...project,
+      }
+    }
+
+    const projectMap = {
+      [TYPE_PROJECT]: createProjectTemplate,
+    }
+    return projectMap[type]()
+  }
 
   isDirEmpty(localPath) {
     let fileList = fs.readdirSync(localPath)
