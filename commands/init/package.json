@@ -25,7 +25,9 @@
   },
   "dependencies": {
     "@iacg-cli/command": "file:../../models/command",
+    "@iacg-cli/package": "file:../../models/package",
     "@iacg-cli/log": "file:../../utils/log",
+    "@iacg-cli/utils": "file:../../utils/utils",
     "@iacg-cli/request": "file:../../utils/request",
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",

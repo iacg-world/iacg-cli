@@ -9,6 +9,8 @@ const path = require('path')
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
+const Package = require('@iacg-cli/package')
+const { spinnerStart, sleep } = require('@iacg-cli/utils')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -18,7 +20,6 @@ const PREFIX_UNICODE = {
 }
 
 const getProjectTemplate = require('./getProjectTemplate')
-// const { spinnerStart, sleep } = require('@iacg-cli/utils');
 
 class InitCommand extends Command {
   init() {
@@ -33,12 +34,12 @@ class InitCommand extends Command {
       // 1. 准备阶段
       await this.prepare()
       // 2. 下载模板
+      this.downloadTemplate()
       // 3. 安装模板ll
     } catch (error) {
       log.error(error)
     }
   }
-
 
   async prepare() {
     // throw new Error("出错了")
@@ -85,12 +86,16 @@ class InitCommand extends Command {
       }
     }
 
-    return this.getProjectInfo()
+    const projectInfo = await this.getProjectInfo()
+    this.projectInfo = projectInfo
+    return projectInfo
   }
+
   checkTemplate(template) {
     // 0. 判断项目模板是否存在
     return template && template.length !== 0
   }
+
   async getProjectInfo() {
     // 1. 选择创建项目或组件
     const { type } = await inquirer.prompt({
@@ -166,7 +171,15 @@ class InitCommand extends Command {
             }
           },
         },
+        {
+          type: 'list',
+          name: 'projectTemplate',
+          prefix: PREFIX_UNICODE.INPUT,
+          message: '请选择项目模板',
+          choices: this.createTemplateChoice(),
+        },
       ])
+
       return {
         type,
         ...project,
@@ -179,6 +192,51 @@ class InitCommand extends Command {
     return projectMap[type]()
   }
 
+  async downloadTemplate() {
+    const { projectTemplate } = this.projectInfo
+    const templateInfo = this.template.find(
+      (item) => item.npmName === projectTemplate
+    )
+
+    const targetPath = path.resolve(userHome, '.iacg-cli', 'template')
+    const storeDir = path.resolve(
+      userHome,
+      '.iacg-cli',
+      'template',
+      'node_modules'
+    )
+
+    const { npmName, version } = templateInfo
+    const templateNpm = new Package({
+      targetPath,
+      storeDir,
+      packageName: npmName,
+      packageVersion: version,
+    })
+    if (!(await templateNpm.exists())) {
+      const spinner = spinnerStart('正在下载模板...')
+      // await sleep()
+      try {
+        await templateNpm.install()
+        log.success('下载模板成功')
+      } catch (e) {
+        throw e
+      } finally {
+        spinner.stop(true)
+      }
+    } else {
+      const spinner = spinnerStart('正在更新模板...')
+      await sleep()
+      try {
+        await templateNpm.update()
+        log.success('更新模板成功')
+      } catch (e) {
+        throw e
+      } finally {
+        spinner.stop(true)
+      }
+    }
+  }
   isDirEmpty(localPath) {
     let fileList = fs.readdirSync(localPath)
     // 文件过滤的逻辑

@@ -99,6 +99,7 @@ function checkEnv() {
   }
   createDefaultConfig()
   log.info('环境变量', process.env.CLI_HOME_PATH)
+  log.info('域名', process.env.IACG_CLI_BASE_URL)
 }
 
 // 创建默认cli配置

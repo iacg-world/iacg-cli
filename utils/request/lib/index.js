@@ -2,8 +2,8 @@
 
 const axios = require('axios')
 
-const BASE_URL = process.env.IMOOC_CLI_BASE_URL
-  ? process.env.IMOOC_CLI_BASE_URL
+const BASE_URL = process.env.IACG_CLI_BASE_URL
+  ? process.env.IACG_CLI_BASE_URL
   : 'http://localhost:7001'
 
 const request = axios.create({
