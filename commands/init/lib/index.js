@@ -13,6 +13,7 @@ const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
 const Package = require('@iacg-cli/package')
 const { spinnerStart, sleep, execAsync } = require('@iacg-cli/utils')
+const getProjectTemplate = require('./getProjectTemplate')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -22,9 +23,7 @@ const PREFIX_UNICODE = {
   INIT: '\ud83d\udccc',
   INPUT: '✍️ ',
 }
-const WHITE_COMMAND = ['npm', 'cnpm'] // 白名单命令
-
-const getProjectTemplate = require('./getProjectTemplate')
+const WHITE_COMMAND = ['npm', 'cnpm', 'pnpm', 'yarn'] // 白名单命令
 
 class InitCommand extends Command {
   init() {
@@ -58,6 +57,7 @@ class InitCommand extends Command {
       throw new Error('项目模板不存在')
     }
     this.template = template
+    log.verbose('this.template', this.template)
 
     // 1. 判断当前目录是否为空
     const localPath = process.cwd()
@@ -140,66 +140,69 @@ class InitCommand extends Command {
       ],
     })
     log.verbose('type', type)
-
-    if (type === TYPE_PROJECT) {
-      // 2. 获取项目的基本信息
-      const projectNamePrompt = {
+    this.template = this.template.filter((template) =>
+      template.tag.includes(type)
+    )
+    const title = type === TYPE_PROJECT ? '项目' : '组件'
+    const projectNamePrompt = {
+      type: 'input',
+      name: 'projectName',
+      message: `请输入${title}名称`,
+      default: '',
+      validate: function (v) {
+        const done = this.async()
+        setTimeout(function () {
+          // 1.首字符必须为英文字符
+          // 2.尾字符必须为英文或数字，不能为字符
+          // 3.字符仅允许"-_"
+          if (!isValidName(v)) {
+            done(`请输入合法的${title}名称`)
+            return
+          }
+          done(null, true)
+        }, 0)
+      },
+      filter: function (v) {
+        return v
+      },
+    }
+    const projectPrompt = []
+    if (!isProjectNameValid) {
+      projectPrompt.push(projectNamePrompt)
+    }
+    projectPrompt.push(
+      {
         type: 'input',
-        name: 'projectName',
-        message: '请输入项目名称',
-        default: '',
+        name: 'projectVersion',
+        message: `请输入${title}版本号`,
+        default: '1.0.0',
         validate: function (v) {
           const done = this.async()
           setTimeout(function () {
-            // 1.首字符必须为英文字符
-            // 2.尾字符必须为英文或数字，不能为字符
-            // 3.字符仅允许"-_"
-            if (!isValidName(v)) {
-              done('请输入合法的项目名称')
+            if (!!!semver.valid(v)) {
+              done('请输入合法的版本号')
               return
             }
             done(null, true)
           }, 0)
         },
         filter: function (v) {
-          return v
+          if (!!semver.valid(v)) {
+            return semver.valid(v)
+          } else {
+            return v
+          }
         },
+      },
+      {
+        type: 'list',
+        name: 'projectTemplate',
+        message: `请选择${title}模板`,
+        choices: this.createTemplateChoice(),
       }
-      const projectPrompt = []
-      if (!isProjectNameValid) {
-        projectPrompt.push(projectNamePrompt)
-      }
-      projectPrompt.push(
-        {
-          type: 'input',
-          name: 'projectVersion',
-          message: '请输入项目版本号',
-          default: '1.0.0',
-          validate: function (v) {
-            const done = this.async()
-            setTimeout(function () {
-              if (!!!semver.valid(v)) {
-                done('请输入合法的版本号')
-                return
-              }
-              done(null, true)
-            }, 0)
-          },
-          filter: function (v) {
-            if (!!semver.valid(v)) {
-              return semver.valid(v)
-            } else {
-              return v
-            }
-          },
-        },
-        {
-          type: 'list',
-          name: 'projectTemplate',
-          message: '请选择项目模板',
-          choices: this.createTemplateChoice(),
-        }
-      )
+    )
+    if (type === TYPE_PROJECT) {
+      // 2. 获取项目的基本信息
       const project = await inquirer.prompt(projectPrompt)
       projectInfo = {
         ...projectInfo,
@@ -207,7 +210,32 @@ class InitCommand extends Command {
         ...project,
       }
     } else if (type === TYPE_COMPONENT) {
+      const descriptionPrompt = {
+        type: 'input',
+        name: 'componentDescription',
+        message: '请输入组件描述信息',
+        default: '',
+        validate: function (v) {
+          const done = this.async()
+          setTimeout(function () {
+            if (!v) {
+              done('请输入组件描述信息')
+              return
+            }
+            done(null, true)
+          }, 0)
+        },
+      }
+      projectPrompt.push(descriptionPrompt)
+      // 2. 获取组件的基本信息
+      const component = await inquirer.prompt(projectPrompt)
+      projectInfo = {
+        ...projectInfo,
+        type,
+        ...component,
+      }
     }
+
     // 生成classname, 将驼峰转为"-"
     if (projectInfo.projectName) {
       projectInfo.name = projectInfo.projectName
@@ -314,7 +342,8 @@ class InitCommand extends Command {
     } finally {
       spinner.stop(true)
     }
-    const ignore = ['node_modules/**', 'public/**']
+    const templateIgnore = this.templateInfo.ignore || []
+    const ignore = ['**/node_modules/**', ...templateIgnore]
     // ejs模板渲染
     await this.ejsRender({ ignore })
     const { installCommand, startCommand } = this.templateInfo
@@ -368,7 +397,7 @@ class InitCommand extends Command {
               const filePath = path.join(dir, file)
               return new Promise((resolve1, reject1) => {
                 ejs.renderFile(filePath, projectInfo, {}, (err, result) => {
-                  if (err) { 
+                  if (err) {
                     reject1(err)
                   } else {
                     log.verbose('ejs', result)
