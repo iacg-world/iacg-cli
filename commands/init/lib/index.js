@@ -6,7 +6,7 @@ const semver = require('semver')
 const userHome = require('user-home')
 const fs = require('fs')
 const path = require('path')
-const glob = require('glob');
+const glob = require('glob')
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
@@ -104,6 +104,19 @@ class InitCommand extends Command {
   }
 
   async getProjectInfo() {
+    const isValidName = (v) => {
+      return /^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
+        v
+      )
+    }
+
+    let projectInfo = {}
+    let isProjectNameValid = false
+    if (isValidName(this.projectName)) {
+      isProjectNameValid = true
+      projectInfo.projectName = this.projectName
+    }
+
     // 1. 选择创建项目或组件
     const { type } = await inquirer.prompt({
       type: 'list',
@@ -124,42 +137,40 @@ class InitCommand extends Command {
     })
     log.verbose('type', type)
 
-    const createProjectTemplate = async () => {
+    if (type === TYPE_PROJECT) {
       // 2. 获取项目的基本信息
-      const project = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'projectName',
-          message: '请输入项目名称',
-          prefix: PREFIX_UNICODE.INPUT,
-          default: '',
-          validate: function (v) {
-            const done = this.async()
-            setTimeout(function () {
-              // 1.首字符必须为英文字符
-              // 2.尾字符必须为英文或数字，不能为字符
-              // 3.字符仅允许"-和_"
-              if (
-                !/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
-                  v
-                )
-              ) {
-                done('请输入合法的项目名称')
-                return
-              }
-              done(null, true)
-            }, 0)
-          },
-          filter: function (v) {
-            return v
-          },
+      const projectNamePrompt = {
+        type: 'input',
+        name: 'projectName',
+        message: '请输入项目名称',
+        default: '',
+        validate: function (v) {
+          const done = this.async()
+          setTimeout(function () {
+            // 1.首字符必须为英文字符
+            // 2.尾字符必须为英文或数字，不能为字符
+            // 3.字符仅允许"-_"
+            if (!isValidName(v)) {
+              done('请输入合法的项目名称')
+              return
+            }
+            done(null, true)
+          }, 0)
         },
+        filter: function (v) {
+          return v
+        },
+      }
+      const projectPrompt = []
+      if (!isProjectNameValid) {
+        projectPrompt.push(projectNamePrompt)
+      }
+      projectPrompt.push(
         {
           type: 'input',
           name: 'projectVersion',
           message: '请输入项目版本号',
           default: '1.0.0',
-          prefix: PREFIX_UNICODE.INPUT,
           validate: function (v) {
             const done = this.async()
             setTimeout(function () {
@@ -181,22 +192,29 @@ class InitCommand extends Command {
         {
           type: 'list',
           name: 'projectTemplate',
-          prefix: PREFIX_UNICODE.INPUT,
           message: '请选择项目模板',
           choices: this.createTemplateChoice(),
-        },
-      ])
-
-      return {
+        }
+      )
+      const project = await inquirer.prompt(projectPrompt)
+      projectInfo = {
+        ...projectInfo,
         type,
         ...project,
       }
+    } else if (type === TYPE_COMPONENT) {
     }
-
-    const projectMap = {
-      [TYPE_PROJECT]: createProjectTemplate,
+    // 生成classname, 将驼峰转为"-"
+    if (projectInfo.projectName) {
+      projectInfo.name = projectInfo.projectName
+      projectInfo.className = require('kebab-case')(
+        projectInfo.projectName
+      ).replace(/^-/, '')
     }
-    return projectMap[type]()
+    if (projectInfo.projectVersion) {
+      projectInfo.version = projectInfo.projectVersion
+    }
+    return projectInfo
   }
 
   async downloadTemplate() {

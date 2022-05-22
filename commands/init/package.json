@@ -25,12 +25,13 @@
   },
   "dependencies": {
     "@iacg-cli/command": "file:../../models/command",
-    "@iacg-cli/package": "file:../../models/package",
     "@iacg-cli/log": "file:../../utils/log",
-    "@iacg-cli/utils": "file:../../utils/utils",
+    "@iacg-cli/package": "file:../../models/package",
     "@iacg-cli/request": "file:../../utils/request",
+    "@iacg-cli/utils": "file:../../utils/utils",
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",
+    "kebab-case": "^1.0.1",
     "semver": "^7.3.7",
     "user-home": "^3.0.0"
   },
