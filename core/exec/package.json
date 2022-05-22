@@ -1,6 +1,6 @@
 {
   "name": "@iacg-cli/exec",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "iacg-cli exec",
   "author": "supercll <1033581609@qq.com>",
   "homepage": "https://github.com/iacg-world/iacg-cli#readme",
@@ -24,9 +24,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@iacg-cli/init": "file:../../commands/init",
     "@iacg-cli/log": "file:../../utils/log",
     "@iacg-cli/package": "file:../../models/package",
-    "@iacg-cli/init": "file:../../commands/init",
     "@iacg-cli/utils": "file:../../utils/utils"
   },
   "bugs": {
