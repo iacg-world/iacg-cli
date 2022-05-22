@@ -14,6 +14,8 @@ const { spinnerStart, sleep } = require('@iacg-cli/utils')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
+const TEMPLATE_TYPE_NORMAL = 'normal'
+const TEMPLATE_TYPE_CUSTOM = 'custom'
 const PREFIX_UNICODE = {
   INIT: '\ud83d\udccc',
   INPUT: '✍️ ',
@@ -36,6 +38,7 @@ class InitCommand extends Command {
       // 2. 下载模板
       this.downloadTemplate()
       // 3. 安装模板ll
+      await this.installTemplate()
     } catch (error) {
       log.error(error)
     }
@@ -49,6 +52,8 @@ class InitCommand extends Command {
       throw new Error('项目模板不存在')
     }
     this.template = template
+    log.verbose('template', template)
+
     // 1. 判断当前目录是否为空
     const localPath = process.cwd()
     log.verbose('localPath', localPath)
@@ -88,6 +93,7 @@ class InitCommand extends Command {
 
     const projectInfo = await this.getProjectInfo()
     this.projectInfo = projectInfo
+    log.verbose('projectInfo', projectInfo)
     return projectInfo
   }
 
@@ -197,7 +203,9 @@ class InitCommand extends Command {
     const templateInfo = this.template.find(
       (item) => item.npmName === projectTemplate
     )
+    this.templateInfo = templateInfo
 
+    log.verbose('templateInfo', templateInfo)
     const targetPath = path.resolve(userHome, '.iacg-cli', 'template')
     const storeDir = path.resolve(
       userHome,
@@ -219,6 +227,7 @@ class InitCommand extends Command {
       try {
         await templateNpm.install()
         log.success('下载模板成功')
+        this.templateNpm = templateNpm;
       } catch (e) {
         throw e
       } finally {
@@ -237,6 +246,53 @@ class InitCommand extends Command {
       }
     }
   }
+
+  async installTemplate() {
+    if (this.templateInfo) {
+      if (!this.templateInfo.type) {
+        this.templateInfo.type = TEMPLATE_TYPE_NORMAL
+      }
+      if (this.templateInfo.type === TEMPLATE_TYPE_NORMAL) {
+        // 标准安装
+        await this.installNormalTemplate()
+      } else if (this.templateInfo.type === TEMPLATE_TYPE_CUSTOM) {
+        // 自定义安装
+        await this.installCustomTemplate()
+      } else {
+        throw new Error('无法识别项目模板类型！')
+      }
+    } else {
+      throw new Error('项目模板信息不存在！')
+    }
+  }
+
+  async installNormalTemplate() {
+    log.notice('安装标准模板')
+    // 拷贝模板代码至当前目录
+    let spinner = spinnerStart('正在安装模板...')
+    await sleep()
+    try {
+      const templatePath = path.resolve(
+        this.templateNpm.cacheFilePath,
+        'template'
+      )
+      const targetPath = process.cwd()
+      fse.ensureDirSync(templatePath)
+      fse.ensureDirSync(targetPath)
+      fse.copySync(templatePath, targetPath)
+    } catch (e) {
+      throw e
+    } finally {
+      spinner.stop(true)
+      log.success('模板安装成功')
+    }
+
+  }
+
+  async installCustomTemplate() {
+    log.notice('安装自定义模板')
+  }
+
   isDirEmpty(localPath) {
     let fileList = fs.readdirSync(localPath)
     // 文件过滤的逻辑
