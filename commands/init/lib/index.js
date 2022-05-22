@@ -6,11 +6,12 @@ const semver = require('semver')
 const userHome = require('user-home')
 const fs = require('fs')
 const path = require('path')
+const glob = require('glob');
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
 const Package = require('@iacg-cli/package')
-const { spinnerStart, sleep } = require('@iacg-cli/utils')
+const { spinnerStart, sleep, execAsync } = require('@iacg-cli/utils')
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -20,6 +21,7 @@ const PREFIX_UNICODE = {
   INIT: '\ud83d\udccc',
   INPUT: '✍️ ',
 }
+const WHITE_COMMAND = ['npm', 'cnpm'] // 白名单命令
 
 const getProjectTemplate = require('./getProjectTemplate')
 
@@ -36,8 +38,8 @@ class InitCommand extends Command {
       // 1. 准备阶段
       await this.prepare()
       // 2. 下载模板
-      this.downloadTemplate()
-      // 3. 安装模板ll
+      await this.downloadTemplate()
+      // 3. 安装模板
       await this.installTemplate()
     } catch (error) {
       log.error(error)
@@ -52,7 +54,6 @@ class InitCommand extends Command {
       throw new Error('项目模板不存在')
     }
     this.template = template
-    log.verbose('template', template)
 
     // 1. 判断当前目录是否为空
     const localPath = process.cwd()
@@ -203,9 +204,6 @@ class InitCommand extends Command {
     const templateInfo = this.template.find(
       (item) => item.npmName === projectTemplate
     )
-    this.templateInfo = templateInfo
-
-    log.verbose('templateInfo', templateInfo)
     const targetPath = path.resolve(userHome, '.iacg-cli', 'template')
     const storeDir = path.resolve(
       userHome,
@@ -215,6 +213,7 @@ class InitCommand extends Command {
     )
 
     const { npmName, version } = templateInfo
+    this.templateInfo = templateInfo
     const templateNpm = new Package({
       targetPath,
       storeDir,
@@ -223,22 +222,27 @@ class InitCommand extends Command {
     })
     if (!(await templateNpm.exists())) {
       const spinner = spinnerStart('正在下载模板...')
-      // await sleep()
+      await sleep()
       try {
         await templateNpm.install()
-        log.success('下载模板成功')
-        this.templateNpm = templateNpm;
       } catch (e) {
         throw e
       } finally {
         spinner.stop(true)
+        if (await templateNpm.exists()) {
+          log.success('下载模板成功')
+          this.templateNpm = templateNpm
+        }
       }
     } else {
       const spinner = spinnerStart('正在更新模板...')
       await sleep()
       try {
         await templateNpm.update()
-        log.success('更新模板成功')
+        if (await templateNpm.exists()) {
+          log.success('更新模板成功')
+          this.templateNpm = templateNpm
+        }
       } catch (e) {
         throw e
       } finally {
@@ -271,6 +275,7 @@ class InitCommand extends Command {
     // 拷贝模板代码至当前目录
     let spinner = spinnerStart('正在安装模板...')
     await sleep()
+    log.verbose('templateNpm', this.templateNpm)
     try {
       const templatePath = path.resolve(
         this.templateNpm.cacheFilePath,
@@ -280,17 +285,50 @@ class InitCommand extends Command {
       fse.ensureDirSync(templatePath)
       fse.ensureDirSync(targetPath)
       fse.copySync(templatePath, targetPath)
-    } catch (e) {
-      throw e
-    } finally {
       spinner.stop(true)
       log.success('模板安装成功')
+    } catch (e) {
+      throw new Error('模板安装失败')
+    } finally {
+      spinner.stop(true)
     }
+    const ignore = ['node_modules/**', 'public/**']
+    const { installCommand, startCommand } = this.templateInfo
+    // 依赖安装
+    await this.execCommand(installCommand, '依赖安装过程中失败！')
+    // 启动命令执行
+    await this.execCommand(startCommand, '依赖安装过程中失败！')
+  }
 
+  async execCommand(command, errMsg) {
+    let ret
+    if (command) {
+      const cmdArray = command.split(' ')
+      const cmd = this.checkCommand(cmdArray[0])
+      if (!cmd) {
+        throw new Error('命令不存在！命令：' + command)
+      }
+      const args = cmdArray.slice(1)
+      ret = await execAsync(cmd, args, {
+        stdio: 'inherit',
+        cwd: process.cwd(),
+      })
+    }
+    if (ret !== 0) {
+      throw new Error(errMsg)
+    }
+    return ret
   }
 
   async installCustomTemplate() {
     log.notice('安装自定义模板')
+  }
+
+  checkCommand(cmd) {
+    if (WHITE_COMMAND.includes(cmd)) {
+      return cmd
+    }
+    return null
   }
 
   isDirEmpty(localPath) {
@@ -311,7 +349,6 @@ class InitCommand extends Command {
 }
 
 function init(argv) {
-  // console.log('init', projectName, cmdObj.force, process.env.CLI_TARGET_PATH);
   return new InitCommand(argv)
 }
 

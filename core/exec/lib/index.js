@@ -1,9 +1,9 @@
 'use strict'
 
 const path = require('path')
+const cp = require('child_process')
 const Package = require('@iacg-cli/package')
 const log = require('@iacg-cli/log')
-const cp = require('child_process')
 
 const SETTINGS = {
   init: '@iacg-cli/init',
