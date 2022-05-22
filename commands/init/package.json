@@ -29,6 +29,7 @@
     "@iacg-cli/package": "file:../../models/package",
     "@iacg-cli/request": "file:../../utils/request",
     "@iacg-cli/utils": "file:../../utils/utils",
+    "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.4",
     "kebab-case": "^1.0.1",

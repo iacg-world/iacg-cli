@@ -7,6 +7,7 @@ const userHome = require('user-home')
 const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
+const ejs = require('ejs')
 
 const Command = require('@iacg-cli/command')
 const log = require('@iacg-cli/log')
@@ -43,6 +44,9 @@ class InitCommand extends Command {
       await this.installTemplate()
     } catch (error) {
       log.error(error)
+      if (process.env.LOG_LEVEL === 'verbose') {
+        console.log(error)
+      }
     }
   }
 
@@ -311,11 +315,13 @@ class InitCommand extends Command {
       spinner.stop(true)
     }
     const ignore = ['node_modules/**', 'public/**']
+    // ejs模板渲染
+    await this.ejsRender({ ignore })
     const { installCommand, startCommand } = this.templateInfo
     // 依赖安装
     await this.execCommand(installCommand, '依赖安装过程中失败！')
     // 启动命令执行
-    await this.execCommand(startCommand, '依赖安装过程中失败！')
+    await this.execCommand(startCommand, '启动执行命令失败！')
   }
 
   async execCommand(command, errMsg) {
@@ -340,6 +346,48 @@ class InitCommand extends Command {
 
   async installCustomTemplate() {
     log.notice('安装自定义模板')
+  }
+
+  async ejsRender(options) {
+    const dir = process.cwd()
+    const projectInfo = this.projectInfo
+    return new Promise((resolve, reject) => {
+      glob(
+        '**',
+        {
+          cwd: dir,
+          ignore: options.ignore || '',
+          nodir: true,
+        },
+        function (err, files) {
+          if (err) {
+            reject(err)
+          }
+          Promise.all(
+            files.map((file) => {
+              const filePath = path.join(dir, file)
+              return new Promise((resolve1, reject1) => {
+                ejs.renderFile(filePath, projectInfo, {}, (err, result) => {
+                  if (err) { 
+                    reject1(err)
+                  } else {
+                    log.verbose('ejs', result)
+                    fse.writeFileSync(filePath, result)
+                    resolve1(result)
+                  }
+                })
+              })
+            })
+          )
+            .then(() => {
+              resolve()
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        }
+      )
+    })
   }
 
   checkCommand(cmd) {
