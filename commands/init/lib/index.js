@@ -338,7 +338,7 @@ class InitCommand extends Command {
       spinner.stop(true)
       log.success('模板安装成功')
     } catch (e) {
-      throw new Error('模板安装失败')
+      throw new Error('模板安装失败: ' + e)
     } finally {
       spinner.stop(true)
     }

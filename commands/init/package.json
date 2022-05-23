@@ -31,6 +31,7 @@
     "@iacg-cli/utils": "file:../../utils/utils",
     "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
+    "glob": "^7.1.6",
     "inquirer": "^8.2.4",
     "kebab-case": "^1.0.1",
     "semver": "^7.3.7",
