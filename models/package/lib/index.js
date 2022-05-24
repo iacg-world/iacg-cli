@@ -73,7 +73,7 @@ class Package {
     return npminstall({
       root: this.targetPath,
       storeDir: this.storeDir,
-      registry: getDefaultRegistry(),
+      registry: getDefaultRegistry(true),
       pkgs: [
         {
           name: this.packageName,
@@ -95,7 +95,7 @@ class Package {
       await npminstall({
         root: this.targetPath,
         storeDir: this.storeDir,
-        registry: getDefaultRegistry(),
+        registry: getDefaultRegistry(true),
         pkgs: [
           {
             name: this.packageName,

@@ -29,8 +29,6 @@ class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || ''
     this.force = !!this._cmd.force
-    log.verbose('projectName', this.projectName)
-    log.verbose('force', this.force)
   }
 
   async exec() {
@@ -57,7 +55,6 @@ class InitCommand extends Command {
       throw new Error('项目模板不存在')
     }
     this.template = template
-    log.verbose('this.template', this.template)
 
     // 1. 判断当前目录是否为空
     const localPath = process.cwd()
@@ -139,7 +136,6 @@ class InitCommand extends Command {
         },
       ],
     })
-    log.verbose('type', type)
     this.template = this.template.filter((template) =>
       template.tag.includes(type)
     )
@@ -271,7 +267,7 @@ class InitCommand extends Command {
       packageVersion: version,
     })
     if (!(await templateNpm.exists())) {
-      const spinner = spinnerStart('正在下载模板...')
+      const spinner = spinnerStart(`正在下载模板${npmName}@${version}...`)
       await sleep()
       try {
         await templateNpm.install()
@@ -285,7 +281,7 @@ class InitCommand extends Command {
         }
       }
     } else {
-      const spinner = spinnerStart('正在更新模板...')
+      const spinner = spinnerStart(`正在更新模板${npmName}@${version}...`)
       await sleep()
       try {
         await templateNpm.update()
@@ -323,7 +319,9 @@ class InitCommand extends Command {
   async installNormalTemplate() {
     log.notice('安装标准模板')
     // 拷贝模板代码至当前目录
-    let spinner = spinnerStart('正在安装模板...')
+    let spinner = spinnerStart(
+      `正在安装模板@${this.templateNpm.packageVersion}...`
+    )
     await sleep()
     log.verbose('templateNpm', this.templateNpm)
     try {
@@ -374,9 +372,38 @@ class InitCommand extends Command {
   }
 
   async installCustomTemplate() {
-    log.notice('安装自定义模板')
-  }
+    // 查询自定义模板的入口文件
+    if (await this.templateNpm.exists()) {
+      const rootFile = this.templateNpm.getRootFilePath()
+      if (fs.existsSync(rootFile)) {
+        log.notice('开始执行自定义模板')
+        const templatePath = path.resolve(
+          this.templateNpm.cacheFilePath,
+          'template'
+        )
+        const options = {
+          templateInfo: this.templateInfo,
+          projectInfo: this.projectInfo,
+          sourcePath: templatePath,
+          targetPath: process.cwd(),
+        }
 
+        const code = `require('${rootFile}')(${JSON.stringify(options)})`
+        await execAsync('node', ['-e', code], {
+          stdio: 'inherit',
+          cwd: process.cwd(),
+        })
+        log.success('自定义模板安装成功')
+        const { installCommand, startCommand } = this.templateInfo
+        // 依赖安装
+        await this.execCommand(installCommand, '依赖安装过程中失败！')
+        // 启动命令执行
+        await this.execCommand(startCommand, '启动执行命令失败！')
+      } else {
+        throw new Error('自定义模板入口文件不存在！')
+      }
+    }
+  }
   async ejsRender(options) {
     const dir = process.cwd()
     const projectInfo = this.projectInfo
@@ -400,7 +427,6 @@ class InitCommand extends Command {
                   if (err) {
                     reject1(err)
                   } else {
-                    log.verbose('ejs', result)
                     fse.writeFileSync(filePath, result)
                     resolve1(result)
                   }
