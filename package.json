@@ -3,10 +3,15 @@
   "version": "1.0.2",
   "description": "",
   "scripts": {
+    "changeset": "changeset",
+    "packages-version": "changeset version",
+    "prepublish": "changeset && pnpm run packages-version",
+    "publish": "changeset publish --registry=https://registry.npmjs.com/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@changesets/cli": "^2.26.2"
   }
 }
