@@ -13,6 +13,17 @@ const program = require('commander')
 const constant = require('./const')
 const exec = require('@iacg-cli/exec')
 const formatPath = require('@iacg-cli/format-path')
+const fs = require('fs')
+const fse = require('fs-extra')
+
+function cleanAll() {
+  if (fs.existsSync(process.env.CLI_HOME_PATH)) {
+    fse.emptyDirSync(process.env.CLI_HOME_PATH)
+    log.success('清空全部缓存文件成功', process.env.CLI_HOME_PATH)
+  } else {
+    log.success('文件夹不存在', process.env.CLI_HOME_PATH)
+  }
+}
 
 async function core() {
   try {
@@ -44,7 +55,31 @@ function registerCommand() {
     .command('init [projectName]')
     .option('-f, --force', '是否强制初始化项目')
     .action(exec)
-
+  program
+    .command('clean')
+    .description('清空缓存文件')
+    .option('-a, --all', '清空全部')
+    .option('-dep, --dep', '清空依赖文件')
+    .action((options) => {
+      log.notice('开始清空缓存文件')
+      if (options.all) {
+        cleanAll()
+      } else if (options.dep) {
+        const depPath = path.resolve(
+          process.env.CLI_HOME_PATH,
+          constant.CACHE_DIR
+        )
+        log.notice('正在清空依赖文件：', depPath)
+        if (fs.existsSync(depPath)) {
+          fse.emptyDirSync(depPath)
+          log.success('清空依赖文件成功')
+        } else {
+          log.success('文件夹不存在', depPath)
+        }
+      } else {
+        cleanAll()
+      }
+    })
   // 开启debug模式
   program.on('option:debug', function () {
     if (program.debug) {
