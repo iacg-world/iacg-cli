@@ -2,14 +2,16 @@
   "name": "iacg-cli",
   "version": "1.0.2",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "changeset": "changeset",
+    "packages-version": "changeset version",
+    "prepublish": "changeset && pnpm run packages-version",
+    "publish": "changeset publish --registry=https://registry.npmjs.com/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "@changesets/cli": "^2.26.2"
   }
 }
