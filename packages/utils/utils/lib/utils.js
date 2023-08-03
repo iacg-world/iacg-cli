@@ -1,5 +1,9 @@
 'use strict'
 
+function isWin32 () {
+  return process.platform === 'win32'
+}
+
 function isObject(o) {
   return Object.prototype.toString.call(o) === '[object Object]'
 }
@@ -17,7 +21,9 @@ function sleep(timeout = 1000) {
 }
 
 function exec(command, args, options) {
-  console.log(command, args, options);
+  if (isWin32() && command !== 'node') {
+    command += '.cmd'
+  }
   return require('child_process').spawn(command, args, options || {})
 }
 
